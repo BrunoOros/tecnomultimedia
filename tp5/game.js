@@ -1,0 +1,143 @@
+class Game {
+
+  constructor() {
+    this.estado = "menu";
+    this.personaje = new Personaje();
+    this.enemigos = new Enemigos();
+
+
+    this.contador = this.enemigos.numEnemigos;
+  }
+
+
+  keyPressed() {
+    // cambio de vaiable estado para dibujar lo correspondiente del metodo pantallas()
+    if (this.estado === "menu" && key == 'i' || key == 'I' ) {
+      this.estado = "instrucciones";
+    } else if (this.estado == "instrucciones" && key == 'p' || key == 'P') {
+      this.estado = "juego";
+      this.enemigos.crearEnemigos();
+    } else if (this.estado == "juego" && key == ' ' || key == ' ') {
+      this.personaje.disparar();
+    } else if (this.estado == "creditos" && key == 'r' || key == 'R') {
+      this.reiniciarJuego()
+    } else if (this.estado == "perdiste" && key == 'r' || key == 'R') {
+      this.reiniciarJuego()
+    } else if (this.estado == "ganaste" && key == 'c' || key == 'C') {
+      this.estado = "creditos";
+    }
+  }
+
+
+  pantallas() {
+
+    if (this.estado === "menu") {
+      background(0);
+      fill(255, 255, 255);
+      stroke (50, 150, 50);
+      strokeWeight(8);
+      textSize(62);
+      textAlign(CENTER, CENTER);
+      text("¡Bienvenido al Juego!", width / 2, height / 2 - 50);
+      textSize(34);
+      text("Presiona 'I' para ver las instrucciones", width / 2, height / 2 + 50);
+    } else if (this.estado=== "instrucciones") {
+      background(0);
+      fill(255, 255, 255);
+      stroke (50, 150, 50);
+      strokeWeight(8);
+      textSize(52);
+      textAlign(CENTER, CENTER);
+      text("Instrucciones:Disparar precionando ´SPACE´\n para eliminar enemigos los enemigos antes que te invadan!", width / 2, height / 2 - 150);
+      text("Mueve tu nave con ´LEFT´ Y ´RIGHT´", width / 2, height / 2 -50);
+      textSize(34);
+      text("Presiona 'P' para comenzar el juego.", width / 2, height / 2 + 150);
+    } else if (this.estado === "juego") {
+      background(0);
+      this.personaje.dibujarPersonaje();
+      this.personaje.moverPersonaje();
+      this.personaje.dispararBala();
+      this.enemigos.dibujarEnemigos();
+      this.enemigos.moverEnemigos();
+      this.verificarColisiones();
+
+      fill(255);
+      stroke(50, 150, 50);
+      strokeWeight(8);
+      textSize(24);
+      textAlign(RIGHT);
+      text("Enemigos restantes: " + this.contador, width - 10, 30);
+    } else if (this.estado === "creditos") {
+      background(0);
+      fill(255, 255, 255);
+      stroke (50, 150, 50);
+      strokeWeight(8);
+      textSize(62);
+      textAlign(CENTER, CENTER);
+      text("Créditos:", width / 2, height / 2 - 250);
+      textSize(34);
+      text("Desarrollado por Bruno Orosco", width / 2, height / 2 - 180);
+      text("Tecnologia Multimedial 1", width / 2, height / 2  - 140);
+      text("Profesor Tobias Albirosa", width / 2, height / 2 - 100);
+      text("Comision: 5", width / 2, height / 2 - 50);
+      text("Presiona 'R' para reiniciar.", width / 2, height / 2 + 100);
+    } else if (this.estado === "perdiste") {
+      background(0);
+      fill(255, 255, 255);
+      stroke (150, 50, 50);
+      strokeWeight(8);
+      textSize(62);
+      textAlign(CENTER, CENTER);
+      text("¡Perdiste!", width / 2, height / 2 - 50);
+      textSize(50)
+        text("invadieron tu zona", width / 2, height / 2 + 40);
+      textSize(34);
+      text("Presiona 'R' para reiniciar.", width / 2, height / 2 + 100);
+    } else if (this.estado === "ganaste") {
+      background(0);
+      fill(255, 255, 255);
+      stroke (50, 150, 50);
+      strokeWeight(8);
+      textSize(62);
+      textAlign(CENTER, CENTER);
+      text("¡Ganaste!", width / 2, height / 2 - 50);
+      textSize(34);
+      text("Presiona 'c' para ver creditos", width / 2, height / 2 + 100);
+    }
+  }
+
+
+  verificarColisiones() {
+    for (let i = this.personaje.balas.length - 1; i >= 0; i--) {
+      for (let j = this.enemigos.enemigos.length - 1; j >= 0; j--) {
+        if (this.personaje.balas[i] && this.enemigos.enemigos[j]) {
+          if (
+            //colision entre bala y enemigo
+            this.personaje.balas[i].x < this.enemigos.enemigos[j].x + this.enemigos.enemigoAncho &&
+            this.personaje.balas[i].x + 5 > this.enemigos.enemigos[j].x &&
+            this.personaje.balas[i].y < this.enemigos.enemigos[j].y + this.enemigos.enemigoAlto &&
+            this.personaje.balas[i].y + 15 > this.enemigos.enemigos[j].y
+            ) {
+            // Elimina la bala y marca el enemigo como eliminado
+            this.personaje.balas.splice(i, 1);
+            this.enemigos.enemigos[j].eliminado = true;
+            this.contador--;
+          }
+        }
+      }
+    }
+    //si todos los enemigos mueren te lleva a pantalla ganaste.
+    if (this.enemigos.enemigos.every((enemigo) => enemigo.eliminado)) {
+      this.estado = "ganaste";
+    }
+  }
+
+  reiniciarJuego() {
+    this.enemigos.enemigos = [];
+    this.enemigos.crearEnemigos();
+    this.estado = "menu";
+    this.contador = this.enemigos.numEnemigos;
+    this.personaje.personajeX = width / 2;
+    this.personaje.personajeY = height - 50;
+  }
+}
